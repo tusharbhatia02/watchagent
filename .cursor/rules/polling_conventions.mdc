@@ -1,0 +1,23 @@
+---
+description: Conventions for the weather poller and all API fetch code
+globs: ["app/poller.py", "app/scheduler.py"]
+---
+
+# Polling Error Handling
+
+When a weather API fetch fails for any reason:
+- Log at WARNING level with these exact fields: city=<name>, status=<http_status_or_error_type>, attempt=<retry_count>
+- Do NOT raise the exception — return None and let the scheduler retry on the next interval
+- Example: logger.warning("Poll failed city=%s status=%s attempt=%s", city, e.response.status_code, attempt)
+
+# Deduplication
+
+All reading inserts must use INSERT OR IGNORE with the (city, timestamp) unique constraint.
+Never check for existence before inserting — the DB constraint is the source of truth.
+Check cursor.rowcount == 1 to determine if the insert was new.
+
+# Logging levels
+- New reading stored → INFO
+- Duplicate skipped → DEBUG (not INFO — this happens every poll)
+- Fetch failure → WARNING
+- Event fired → INFO with event_type= and city= fields

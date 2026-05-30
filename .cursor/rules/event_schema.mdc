@@ -1,0 +1,29 @@
+---
+description: Schema and field conventions for all event records
+globs: ["app/events.py", "tests/test_event_detection.py"]
+---
+
+# Event Record Fields
+
+Every event dict passed to the DB must contain exactly these keys:
+  city, event_type, severity, description, timestamp, triggered_at, reading_id, details
+
+- event_type: snake_case string, one of:
+    temperature_spike | temperature_plunge | precipitation_onset |
+    high_wind | severe_weather_code | feels_like_divergence
+- severity: one of "info" | "warning" | "critical"
+- description: human-readable, must include the city name and the measured values that triggered the event
+- details: JSON string — must include the specific numeric values used in detection logic (for auditability)
+- timestamp: the reading's timestamp (when weather occurred)
+- triggered_at: UTC ISO8601 (when the service detected it)
+
+# Threshold Config
+
+All city-specific thresholds live in CITY_CONFIG in app/events.py.
+Never hardcode numeric thresholds inside detection functions — always reference CITY_CONFIG[city].
+
+# Anti-spam
+
+For events that can persist across readings (high_wind, precipitation), check the last event
+of that type for that city before firing. Do not fire a duplicate event if the condition
+was already active in the previous reading.
