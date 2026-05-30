@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - db_data:/data
+    environment:
+      - DB_PATH=/data/watchagent.db
+    restart: unless-stopped
+
+volumes:
+  db_data:
