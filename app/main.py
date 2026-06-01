@@ -1,4 +1,5 @@
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Query
@@ -6,6 +7,10 @@ from fastapi import FastAPI, Query
 from app.database import init_db, get_db
 from app.scheduler import start_scheduler
 
+logging.basicConfig(
+    level=os.getenv("LOG_LEVEL", "INFO").upper(),
+    format="%(asctime)s %(levelname)s %(name)s %(message)s",
+)
 logger = logging.getLogger(__name__)
 
 
@@ -57,7 +62,7 @@ async def readings(city: str | None = None, limit: int = Query(50, ge=1, le=1000
         rows = await cur.fetchall()
     finally:
         await db.close()
-    return [dict(row) for row in rows]
+    return {"readings": [dict(row) for row in rows]}
 
 
 @app.get("/events")
@@ -77,4 +82,4 @@ async def events(city: str | None = None, limit: int = Query(50, ge=1, le=1000))
         rows = await cur.fetchall()
     finally:
         await db.close()
-    return [dict(row) for row in rows]
+    return {"events": [dict(row) for row in rows]}

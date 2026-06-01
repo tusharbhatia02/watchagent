@@ -80,43 +80,47 @@ async def test_readings_returns_list(client):
     resp = await client.get("/readings")
     assert resp.status_code == 200
     body = resp.json()
-    assert isinstance(body, list)
-    assert len(body) == 5
+    assert isinstance(body, dict)
+    readings = body["readings"]
+    assert isinstance(readings, list)
+    assert len(readings) == 5
     # Most recent first.
-    assert body[0]["timestamp"] >= body[-1]["timestamp"]
-    assert {"city", "timestamp", "temperature_2m"} <= set(body[0].keys())
+    assert readings[0]["timestamp"] >= readings[-1]["timestamp"]
+    assert {"city", "timestamp", "temperature_2m"} <= set(readings[0].keys())
 
 
 async def test_readings_city_filter(client):
     resp = await client.get("/readings", params={"city": "Ottawa"})
     assert resp.status_code == 200
-    body = resp.json()
-    assert len(body) == 3
-    assert all(row["city"] == "Ottawa" for row in body)
+    readings = resp.json()["readings"]
+    assert len(readings) == 3
+    assert all(row["city"] == "Ottawa" for row in readings)
 
 
 async def test_readings_limit(client):
     resp = await client.get("/readings", params={"limit": 2})
     assert resp.status_code == 200
-    body = resp.json()
-    assert len(body) == 2
+    readings = resp.json()["readings"]
+    assert len(readings) == 2
 
 
 async def test_events_returns_list(client):
     resp = await client.get("/events")
     assert resp.status_code == 200
     body = resp.json()
-    assert isinstance(body, list)
-    assert len(body) == 2
-    assert {"city", "event_type", "severity"} <= set(body[0].keys())
+    assert isinstance(body, dict)
+    events = body["events"]
+    assert isinstance(events, list)
+    assert len(events) == 2
+    assert {"city", "event_type", "severity"} <= set(events[0].keys())
 
 
 async def test_events_city_filter(client):
     resp = await client.get("/events", params={"city": "Toronto"})
     assert resp.status_code == 200
-    body = resp.json()
-    assert len(body) == 1
-    assert body[0]["city"] == "Toronto"
+    events = resp.json()["events"]
+    assert len(events) == 1
+    assert events[0]["city"] == "Toronto"
 
 
 def test_health_with_testclient(tmp_path, monkeypatch):
