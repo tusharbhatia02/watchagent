@@ -68,7 +68,7 @@ tables read-only.
 ## Quick Start (Docker)
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/yourusername/watchagent
 cd watchagent
 cp .env.example .env
 docker compose up --build
